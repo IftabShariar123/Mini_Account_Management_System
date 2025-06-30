@@ -1,4 +1,5 @@
 using AccountManagement.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
@@ -6,6 +7,7 @@ using System.Data;
 
 namespace AccountManagement.Pages.ChartOfAccounts
 {
+
     public class DeleteModel : PageModel
     {
         private readonly IConfiguration _config;

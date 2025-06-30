@@ -147,3 +147,81 @@ BEGIN
     INNER JOIN ChartOfAccounts a ON e.AccountId = a.AccountId
     WHERE v.VoucherId = @VoucherId
 END
+go
+
+----------------Role & Permission------------
+USE AccountManagement_DB
+CREATE TABLE RoleModuleAccess (
+    Id INT IDENTITY PRIMARY KEY,
+    RoleName NVARCHAR(50),
+    ModuleName NVARCHAR(100),
+    CanCreate BIT DEFAULT 0,
+    CanUpdate BIT DEFAULT 0,
+    CanDelete BIT DEFAULT 0,
+    CanViewList BIT DEFAULT 0,
+    CanViewDetails BIT DEFAULT 0,
+    CONSTRAINT UQ_RoleModule UNIQUE (RoleName, ModuleName)
+);
+GO
+
+
+---------Create---------
+CREATE PROCEDURE sp_AssignModuleAccess
+    @RoleName NVARCHAR(50),
+    @ModuleName NVARCHAR(100),
+    @CanCreate BIT = 0,
+    @CanUpdate BIT = 0,
+    @CanDelete BIT = 0,
+    @CanViewList BIT = 0,
+    @CanViewDetails BIT = 0
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM RoleModuleAccess WHERE RoleName = @RoleName AND ModuleName = @ModuleName)
+    BEGIN
+        UPDATE RoleModuleAccess
+        SET 
+            CanCreate = @CanCreate,
+            CanUpdate = @CanUpdate,
+            CanDelete = @CanDelete,
+            CanViewList = @CanViewList,
+            CanViewDetails = @CanViewDetails
+        WHERE RoleName = @RoleName AND ModuleName = @ModuleName
+    END
+    ELSE
+    BEGIN
+        INSERT INTO RoleModuleAccess (RoleName, ModuleName, CanCreate, CanUpdate, CanDelete, CanViewList, CanViewDetails)
+        VALUES (@RoleName, @ModuleName, @CanCreate, @CanUpdate, @CanDelete, @CanViewList, @CanViewDetails)
+    END
+END
+GO
+
+CREATE PROCEDURE sp_HasAccess
+    @RoleName NVARCHAR(50),
+    @ModuleName NVARCHAR(100)
+AS
+BEGIN
+    -- Check if record exists
+    IF EXISTS (SELECT 1 FROM RoleModuleAccess 
+               WHERE RoleName = @RoleName AND ModuleName = @ModuleName)
+    BEGIN
+        -- Return existing permissions
+        SELECT 
+            CanCreate,
+            CanUpdate,
+            CanDelete,
+            CanViewList,
+            CanViewDetails
+        FROM RoleModuleAccess
+        WHERE RoleName = @RoleName AND ModuleName = @ModuleName
+    END
+    ELSE
+    BEGIN
+        -- Return all false values if no record exists
+        SELECT 
+            0 AS CanCreate,
+            0 AS CanUpdate,
+            0 AS CanDelete,
+            0 AS CanViewList,
+            0 AS CanViewDetails
+    END
+END
