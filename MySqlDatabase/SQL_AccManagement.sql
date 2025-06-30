@@ -60,3 +60,90 @@ WITH AccountTree AS (
     INNER JOIN AccountTree p ON c.ParentAccountId = p.AccountId
 )
 SELECT * FROM AccountTree;
+
+
+
+-------------Voucher part---------------
+use AccountManagement_DB
+CREATE TABLE Voucher (
+    VoucherId INT IDENTITY(1,1) PRIMARY KEY,
+    VoucherDate DATE NOT NULL,
+    ReferenceNo NVARCHAR(50),
+    VoucherType NVARCHAR(20) NOT NULL
+);
+go
+
+use AccountManagement_DB
+CREATE TABLE VoucherEntry (
+    EntryId INT IDENTITY(1,1) PRIMARY KEY,
+    VoucherId INT FOREIGN KEY REFERENCES Voucher(VoucherId),
+    AccountId INT FOREIGN KEY REFERENCES ChartOfAccounts(AccountId),
+    DebitAmount DECIMAL(18,2) DEFAULT 0,
+    CreditAmount DECIMAL(18,2) DEFAULT 0
+);
+go
+
+use AccountManagement_DB
+CREATE TYPE VoucherEntryType AS TABLE (
+    AccountId INT,
+    DebitAmount DECIMAL(18,2),
+    CreditAmount DECIMAL(18,2)
+);
+go
+
+-----------Save or Create----------
+CREATE PROCEDURE sp_SaveVoucher
+    @VoucherDate DATE,
+    @ReferenceNo NVARCHAR(50),
+    @VoucherType NVARCHAR(20),
+    @Entries VoucherEntryType READONLY
+AS
+BEGIN
+    DECLARE @VoucherId INT;
+
+    INSERT INTO Voucher (VoucherDate, ReferenceNo, VoucherType)
+    VALUES (@VoucherDate, @ReferenceNo, @VoucherType);
+
+    SET @VoucherId = SCOPE_IDENTITY();
+
+    INSERT INTO VoucherEntry (VoucherId, AccountId, DebitAmount, CreditAmount)
+    SELECT @VoucherId, AccountId, DebitAmount, CreditAmount FROM @Entries;
+END
+
+
+---------List----------
+CREATE PROCEDURE sp_GetAllVouchers
+AS
+BEGIN
+    SELECT 
+        v.VoucherId,
+        v.VoucherDate,
+        v.ReferenceNo,
+        v.VoucherType,
+        SUM(e.DebitAmount) AS TotalDebit,
+        SUM(e.CreditAmount) AS TotalCredit
+    FROM Voucher v
+    INNER JOIN VoucherEntry e ON v.VoucherId = e.VoucherId
+    GROUP BY v.VoucherId, v.VoucherDate, v.ReferenceNo, v.VoucherType
+    ORDER BY v.VoucherDate DESC
+END
+
+
+----------Details---------
+CREATE PROCEDURE sp_GetVoucherDetails
+    @VoucherId INT
+AS
+BEGIN
+    SELECT 
+        v.VoucherId,
+        v.VoucherDate,
+        v.ReferenceNo,
+        v.VoucherType,
+        e.DebitAmount,
+        e.CreditAmount,
+        a.AccountName
+    FROM Voucher v
+    INNER JOIN VoucherEntry e ON v.VoucherId = e.VoucherId
+    INNER JOIN ChartOfAccounts a ON e.AccountId = a.AccountId
+    WHERE v.VoucherId = @VoucherId
+END

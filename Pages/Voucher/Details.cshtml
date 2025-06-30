@@ -1,0 +1,43 @@
+﻿@page "{id:int}"
+@model DetailsModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Voucher Details</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Date</th>
+        <td>@Model.Voucher.VoucherDate.ToString("yyyy-MM-dd")</td>
+    </tr>
+    <tr>
+        <th>Reference No</th>
+        <td>@Model.Voucher.ReferenceNo</td>
+    </tr>
+    <tr>
+        <th>Type</th>
+        <td>@Model.Voucher.VoucherType</td>
+    </tr>
+</table>
+
+<h4>Line Items</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Account</th>
+            <th>Debit</th>
+            <th>Credit</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Voucher.LineItems)
+        {
+            <tr>
+                <td>@item.AccountName</td>
+                <td>@item.DebitAmount</td>
+                <td>@item.CreditAmount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-page="Index" class="btn btn-secondary">← Back to List</a>

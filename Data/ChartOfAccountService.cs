@@ -47,6 +47,5 @@ namespace AccountManagement.Data
             await cmd.ExecuteNonQueryAsync();
         }
 
-        // Similar for UpdateAsync and DeleteAsync
     }
 }

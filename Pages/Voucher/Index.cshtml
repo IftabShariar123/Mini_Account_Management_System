@@ -1,0 +1,41 @@
+﻿@page
+@model IndexModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Voucher List</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<a asp-page="Create" class="btn btn-success mb-3">➕ Create New Voucher</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Reference No</th>
+            <th>Type</th>
+            <th>Total Debit</th>
+            <th>Total Credit</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var v in Model.Vouchers)
+        {
+            <tr>
+                <td>@v.VoucherDate.ToString("yyyy-MM-dd")</td>
+                <td>@v.ReferenceNo</td>
+                <td>@v.VoucherType</td>
+                <td>@v.TotalDebit</td>
+                <td>@v.TotalCredit</td>
+                <td>
+                    <a asp-page="Details" asp-route-id="@v.VoucherId" class="btn btn-sm btn-info">View</a>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>

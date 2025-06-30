@@ -10,6 +10,5 @@ namespace AccountManagement.Data
             : base(options)
         {
         }
-        public DbSet<ChartOfAccount> ChartOfAccounts { get; set; }
     }
 }
