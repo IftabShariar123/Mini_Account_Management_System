@@ -1,0 +1,48 @@
+﻿@page "{id:int}"
+@model EditModel
+@{
+    ViewData["Title"] = "Edit Account";
+}
+
+<h2>Edit Account</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="Account.AccountId" />
+
+    <div class="form-group">
+        <label asp-for="Account.AccountName"></label>
+        <input asp-for="Account.AccountName" class="form-control" />
+        <span asp-validation-for="Account.AccountName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Account.ParentAccountId">Parent Account</label>
+        <select asp-for="Account.ParentAccountId" class="form-control">
+            <option value="">-- None (Top-Level) --</option>
+            @foreach (var parent in Model.ParentAccounts)
+            {
+                <option value="@parent.AccountId" selected="@(parent.AccountId == Model.Account.ParentAccountId)">
+                    @parent.AccountName
+                </option>
+
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Account.IsActive"></label>
+        <input asp-for="Account.IsActive" type="checkbox" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Account.Remarks"></label>
+        <textarea asp-for="Account.Remarks" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

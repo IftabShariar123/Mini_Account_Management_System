@@ -1,0 +1,27 @@
+﻿@page
+@model IndexModel
+
+<h2>Chart of Accounts</h2>
+
+<a class="btn btn-primary" asp-page="Create">+ Add Account</a>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>Account Hierarchy</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Accounts)
+        {
+            <tr>
+                <td>@item.Remarks</td>
+                <td>
+                    <a asp-page="Edit" asp-route-id="@item.AccountId" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-page="Delete" asp-route-id="@item.AccountId" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
