@@ -1,97 +1,144 @@
-﻿@page "{role?}"
+﻿@page
 @model AssignAccessModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
-<h2>Assign Module Access</h2>
+<h2>🔐 Role & Permission Management</h2>
 
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
 
-<form method="post">
-    <div class="form-group">
-        <label>Select Role</label>
-        <select asp-for="SelectedRole" asp-items="Model.Roles" class="form-control"></select>
+<h4>Create New Role</h4>
+<form method="post" asp-page-handler="AddRole" class="mb-4">
+    <div class="input-group">
+        <input asp-for="NewRole" class="form-control" placeholder="Enter new role name..." />
+        <button type="submit" class="btn btn-primary">Add Role</button>
     </div>
+</form>
 
-    <div class="form-group mt-3">
-        <label>Modules</label><br />
+<h4>Assign or Remove Roles to Users</h4>
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Current Roles</th>
+            <th>Assign New Role</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            View Roles
+                        </button>
+                        <ul class="dropdown-menu">
+                            @if (!Model.UserRoles[user.Id].Any())
+                            {
+                                <li class="dropdown-item text-muted"><b>No roles</b></li>
+                            }
+                            @foreach (var role in Model.UserRoles[user.Id])
+                            {
+                                <li>
+                                    <form method="post" asp-page-handler="RemoveRole" class="d-flex align-items-center px-2">
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        <input type="hidden" name="role" value="@role" />
+                                        <span class="me-2">@role</span>
+                                        <button type="submit" class="btn btn-sm btn-link text-danger" title="Remove" onclick="return confirm('Remove role @role?');">✖</button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </td>
+                <td>
+                    <form method="post" asp-page-handler="AssignRole" class="d-flex">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <select name="role" class="form-control me-2">
+                            @foreach (var role in Model.AllRoles)
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-success btn-sm">Assign</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h4>Assign Module Permissions to Role</h4>
+
+<form method="get" class="mb-3">
+    <label>Select Role</label>
+    <select name="role" class="form-control" onchange="this.form.submit()">
+        <option value="">-- Select Role --</option>
+        @foreach (var r in Model.Roles)
+        {
+            <option value="@r.Value" selected="@(r.Value == Model.SelectedRole ? "selected" : null)">@r.Text</option>
+        }
+    </select>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.SelectedRole))
+{
+    <form method="post">
+        <input type="hidden" name="SelectedRole" value="@Model.SelectedRole" />
+
+        <h5 class="text-primary">Assigning access to: <strong>@Model.SelectedRole</strong></h5>
         @for (int i = 0; i < Model.AllModules.Count; i++)
         {
-            <div class="card mb-3">
-                <div class="card-header">
-                    <button type="button" class="btn btn-sm btn-outline-primary"
-                            data-bs-toggle="collapse" data-bs-target="#module-@Model.AllModules[i].Replace(" ", "-")">
-                        @Model.AllModules[i] <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-                <div class="collapse" id="module-@Model.AllModules[i].Replace(" ", "-")">
-                    <div class="card-body">
-                        <input type="hidden" name="SelectedModules[@i].Name" value="@Model.AllModules[i]" />
+            <div class="card mb-2">
+                <div class="card-header fw-bold">@Model.AllModules[i]</div>
+                <div class="card-body row">
+                    <input type="hidden" name="SelectedModules[@i].Name" value="@Model.AllModules[i]" />
 
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox"
-                                   name="SelectedModules[@i].CanCreate"
-                                   value="true"
-                            @(Model.SelectedModules[@i].CanCreate ? "checked" : "") />
-                            <label class="form-check-label">Create</label>
-                        </div>
-
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox"
-                                   name="SelectedModules[@i].CanUpdate"
-                                   value="true"
-                            @(Model.SelectedModules[@i].CanUpdate ? "checked" : "") />
-                            <label class="form-check-label">Update</label>
-                        </div>
-
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox"
-                                   name="SelectedModules[@i].CanDelete"
-                                   value="true"
-                            @(Model.SelectedModules[@i].CanDelete ? "checked" : "") />
-                            <label class="form-check-label">Delete</label>
-                        </div>
-
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox"
-                                   name="SelectedModules[@i].CanViewList"
-                                   value="true"
-                            @(Model.SelectedModules[@i].CanViewList ? "checked" : "") />
-                            <label class="form-check-label">List</label>
-                        </div>
-
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox"
-                                   name="SelectedModules[@i].CanViewDetails"
-                                   value="true"
-                            @(Model.SelectedModules[@i].CanViewDetails ? "checked" : "") />
-                            <label class="form-check-label">Details</label>
-                        </div>
+                    <div class="col-md-2 form-check">
+                        <input class="form-check-input" type="checkbox" name="SelectedModules[@i].CanCreate" value="true" @(Model.SelectedModules[i].CanCreate ? "checked" : "") />
+                        <label class="form-check-label">Create</label>
+                    </div>
+                    <div class="col-md-2 form-check">
+                        <input class="form-check-input" type="checkbox" name="SelectedModules[@i].CanUpdate" value="true" @(Model.SelectedModules[i].CanUpdate ? "checked" : "") />
+                        <label class="form-check-label">Update</label>
+                    </div>
+                    <div class="col-md-2 form-check">
+                        <input class="form-check-input" type="checkbox" name="SelectedModules[@i].CanDelete" value="true" @(Model.SelectedModules[i].CanDelete ? "checked" : "") />
+                        <label class="form-check-label">Delete</label>
+                    </div>
+                    <div class="col-md-2 form-check">
+                        <input class="form-check-input" type="checkbox" name="SelectedModules[@i].CanViewList" value="true" @(Model.SelectedModules[i].CanViewList ? "checked" : "") />
+                        <label class="form-check-label">List</label>
+                    </div>
+                    <div class="col-md-2 form-check">
+                        <input class="form-check-input" type="checkbox" name="SelectedModules[@i].CanViewDetails" value="true" @(Model.SelectedModules[i].CanViewDetails ? "checked" : "") />
+                        <label class="form-check-label">Details</label>
                     </div>
                 </div>
             </div>
         }
-    </div>
-
-    <button type="submit" class="btn btn-primary mt-3">Assign Access</button>
-</form>
-
-
+        <button type="submit" class="btn btn-primary mt-3">Save Permissions</button>
+    </form>
+}
 @section Scripts {
-        <script>
-            document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(button => {
-                button.addEventListener('click', function() {
-                    const icon = this.querySelector('i');
-                    if (icon.classList.contains('fa-plus')) {
-                        icon.classList.remove('fa-plus');
-                        icon.classList.add('fa-minus');
-                    } else {
-                        icon.classList.remove('fa-minus');
-                        icon.classList.add('fa-plus');
-                    }
-                });
+    <script>
+        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(button => {
+            button.addEventListener('click', function () {
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('fa-plus')) {
+                    icon.classList.remove('fa-plus');
+                    icon.classList.add('fa-minus');
+                } else {
+                    icon.classList.remove('fa-minus');
+                    icon.classList.add('fa-plus');
+                }
             });
-        </script>
+        });
+    </script>
 }

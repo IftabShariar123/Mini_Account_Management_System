@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AccountManagement.styles.css" asp-append-version="true" />
+
 </head>
 <body>
     <header>
@@ -35,6 +36,7 @@
                         @if (User.IsInRole("Admin"))
                         {
                             <li><a class="nav-link text-dark" asp-page="/Admin/AssignAccess">Role Management</a></li>
+
                         }
 
 
