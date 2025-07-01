@@ -71,9 +71,11 @@ Guideline-- how to use this software>>
 Step-1>> Firstly Create SQL Server DB and run the SQL scripts for:Tables , Stored Procedures
 
 Step-2>> Open this project in Visual Studio....go to appsetings.json give your server name in connectionstring
+
 "ConnectionStrings": {
-  "DefaultConnection": "Server=.;Database=MiniAccountDb;Trusted_Connection=True;"
+  "DefaultConnection": "Server=here give your own server name;Database=AccountManagement_DB;Trusted_Connection=True;MultipleActiveResultSets=true"
 }
+
 
 
 Step-3>>  do migration for some seed value then run the project.
