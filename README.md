@@ -85,6 +85,9 @@ Step-4>> Do login >> Username: Shariar@gmail.com
 Step-5>> After login you can Create, Edit, Delete Accounts from ChartOfAccounts and also Vouchers
         Without giving role permission can't process Accounts and Vouchers
 
+All Screenshots included in images folder which stay in project root
+
+----------------------------------------------------
 
         ## 🖼️ Screenshots
 
